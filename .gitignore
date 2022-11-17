@@ -7,3 +7,8 @@ src/.ipynb_checkpoints
 src/output
 src/results
 src/logs
+
+# ignore everything in src/models
+src/models/*
+# but not anything ending in .stan
+!src/models/*.stan
