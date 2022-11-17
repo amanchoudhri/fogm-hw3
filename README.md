@@ -1,4 +1,4 @@
-STCS 6701: Homework 2
+STCS 6701: Homework 3
 ------
 This repo contains my code and writeup for homework 3 of David Blei's
 Probabilistic Models and Machine Learning class. In this project, I take a
