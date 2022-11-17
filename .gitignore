@@ -1,0 +1,9 @@
+# miscellaneous files
+src/aux
+src/data
+src/vae
+src/__pycache__
+src/.ipynb_checkpoints
+src/output
+src/results
+src/logs
