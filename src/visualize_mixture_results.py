@@ -39,7 +39,7 @@ def get_args():
     p.add_argument(
         '--N_samples',
         help='Optional, the number of samples to draw and plot from each cluster. Default: 12',
-        default=12,
+        default=5,
         )
     p.add_argument(
         '--no_reproject',
@@ -50,6 +50,8 @@ def get_args():
 
 def main(result_dir, out_dir=None, N_samples=12, no_reproject=False):
     vae = load_vae()
+    # load in projection matrix
+    # (initially used to reduce the number of low-variance / zeroed features)
     PI = np.load('aux/projection_matrix.npy')
 
 
@@ -73,13 +75,19 @@ def main(result_dir, out_dir=None, N_samples=12, no_reproject=False):
     # and plot
     fig, axs = subplots(len(cluster_mean_spectrograms))
     for s, ax in zip(cluster_mean_spectrograms, axs):
-        ax.imshow(s.reshape(*ORIGINAL_SPECTROGRAM_SHAPE))
+        img = np.array(s.reshape(*ORIGINAL_SPECTROGRAM_SHAPE))
+        ax.imshow(img[::-1])
     fig.suptitle(f'Reconstructed means from each cluster, K = {len(cluster_mean_spectrograms)}')
 
     plt.savefig(out_dir / 'cluster_means.png')
 
     # draw N_samples from each cluster and decode back to spectrograms
-    fig, axs = plt.subplots(len(cluster_mean_spectrograms), N_samples, figsize=(24, 24))
+    fig, axs = plt.subplots(
+        len(cluster_mean_spectrograms), N_samples, figsize=(10, 20),
+        sharex=True,
+        sharey=True
+        )
+
     for i, (ax_row, beta_value, sigma_value) in enumerate(zip(axs, posterior_beta, posterior_sigma)):
         # draw N samples from each cluster distribution
         samples = rng.multivariate_normal(beta_value, np.diag(sigma_value), size=N_samples)
@@ -91,7 +99,8 @@ def main(result_dir, out_dir=None, N_samples=12, no_reproject=False):
             sample_spectrograms = vae.decode(torch.tensor(samples, dtype=torch.float))
         # and plot them
         for j, (ax, s) in enumerate(zip(ax_row, sample_spectrograms)):
-            ax.imshow(s.reshape(*ORIGINAL_SPECTROGRAM_SHAPE))
+            img = np.array(s.reshape(*ORIGINAL_SPECTROGRAM_SHAPE))
+            ax.imshow(img[::-1])
             if j == 0:
                 ax.set_ylabel(f'Cluster {i} (proportion: {posterior_theta[i]:0.4f})', rotation=0, labelpad=70)
 
